@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import random
 
 class State(object):
     def __init__(self, name):
@@ -25,11 +26,28 @@ class State(object):
         # try to make transition down from this state
         raise NotImplementedError
 
+    def __str__(self):
+        return self.name
+
 
 class GroundState(State):
     def __init__(self):
         super(GroundState, self).__init__('GROUND')
-    
+
     def is_excited(self):
         # this is not physically correct, but makes things easiert :)
         return True
+
+class FailingState(State):
+    def __init__(self, name, success_rate):
+        self.success_rate = success_rate
+        super(FailingState, self).__init__(name)
+
+    def do_we_succeed(self):
+        return random.random() < self.success_rate
+
+    def is_excited(self):
+        return self.do_we_succeed()
+
+    def excite(self):
+        return self.do_we_succeed()

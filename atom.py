@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from state import GroundState()
+from state import GroundState
 
 class IonisationReached(Exception):
     pass
@@ -16,7 +16,6 @@ class Atom(object):
     def ground_state(self):
         return self.state(0)
 
-    @property
     def state(self, energy=-1):
         if energy == -1:
             energy = self._energy
@@ -32,12 +31,15 @@ class Atom(object):
         return self.state(self._energy).is_excited()
 
     def excite(self, energy):
+        print '=== REQUEST:', self.state(energy)
         if self._energy == energy:
             return True
         for E in range(self._energy+1, energy+1):
             if self.state(E).excite():
+                print '+++ STATE:', self.state(E)
                 self._energy += 1
             else:
+                print '--- STATE:', self.state(E)
                 return False
         return True
 
@@ -45,6 +47,7 @@ class Atom(object):
         raise NotImplementedError
 
     def quantum_leap(self, target):
+        # Request a state transition
         if target >= len(self._states):
             raise IonisationReached()
         self._target_energy = target
@@ -54,9 +57,11 @@ class Atom(object):
         # we are in the state that we should be in, and
         # whether we need to do a state transition
         while not self.is_excited():
+            print '--- LOST:', self.state()
             self._energy -= 1
         if self._energy < self._target_energy:
             self.excite(self._target_energy)
         elif self._energy > self._target_energy:
             self.decay(self._target_energy)
-        
+        print self.state().name
+
